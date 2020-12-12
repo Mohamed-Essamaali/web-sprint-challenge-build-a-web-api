@@ -16,6 +16,15 @@ Go code!
 const server = require('./api/server')
 
 
+// default error if someting wrong
+server.use((err,req,res,next)=>{
+    console.log(err)
+    res.status(500).json({
+        message:"Something went wrong try later"
+    })
+    next()
+})
+
 
 const port = 4000
 
