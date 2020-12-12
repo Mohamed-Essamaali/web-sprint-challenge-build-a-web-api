@@ -70,14 +70,12 @@ router.get('/api/projects/:id/actions/:id', (req,res,next)=>{
 
     // deleting an action
 
-    router.delete('/api/projects/:projectId/actions/:actionId',async (req,res,next)=>{
+    router.delete('/api/projects/:projectId/actions/:actionId', (req,res,next)=>{
 
-        try{
+    
             actions.remove(req.params.actionId)
-            res.status(204).json({message:`action with id ${req.params.actionId} is deleted successfully`})
-            
-        }
-        catch(err){next(err)}
+            .then(()=>res.send({message:`action with id ${req.params.actionId} is deleted successfully`}))
+            .catch(err=>next(err))
 
 
     })
