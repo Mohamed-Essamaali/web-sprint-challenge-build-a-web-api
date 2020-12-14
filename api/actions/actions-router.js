@@ -25,15 +25,15 @@ const validateActions = ()=>{
 ////////////////////////////////////////////////////////
 
 // get single action based on id
-router.get('/api/projects/:id/actions/:id', (req,res,next)=>{
+router.get('/api/projects/:pID/actions/:aID', (req,res,next)=>{
 
-    actions.get(req.params.id)
+    actions.get(req.params.aID)
     .then(action=>{
         if(action){
             res.status(200).json(action)
         } else
         {
-            res.status(404).json({message: `Action not found with id ${req.params.id}`})
+            res.status(404).json({message: `Action not found with id ${req.params.aID}`})
         }
         
     })

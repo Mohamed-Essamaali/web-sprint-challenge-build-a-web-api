@@ -7,7 +7,7 @@ const router = express.Router()
 /////////////////////////////////
  // middleware
 
- const validateProject=()=>{
+ const validateProjectContent=()=>{
      return (req,res,next)=>{
          let project = req.body
          if(!project.name || !project.description){
@@ -18,26 +18,33 @@ const router = express.Router()
      }
  }
 
+ const validateProjectID = ()=>{
+     return (req,res,next)=>{
+        projects.get(req.params.id)
+        .then(project=>{
+            if(project){
+                req.body = project
+                res.status(200).json(project)
+            } else {
+                res.send({message:`No Project with id ${req.params.id}`})
+            }
+        })
+     }
+ }
+
 //////////////////////////////////////
 // get,
 // insert,
 // update,
 // remove,
 // getProjectActions,
-router.get('/:id',(req,res,next)=>{
-    projects.get(req.params.id)
-    .then(project=>{
-        if(project){
-            res.status(200).json(project)
-        } else{
-            res.status(404).json({message:`No Project found with id ${req.params.id}`})
-        }
-    })
+router.get('/:id',validateProjectID(),(req,res,next)=>{
+            res.status(200).json(req.body)
     .catch(err=>next(err))
 })
 
 // insert 
-router.post('/', validateProject(), (req,res,next)=>{
+router.post('/', validateProjectContent(), (req,res,next)=>{
     let project = req.body
     console.log('project will be inserted ',project)
      projects.insert(project)
@@ -53,7 +60,7 @@ router.post('/', validateProject(), (req,res,next)=>{
 
 //update
 
-router.put('/:id', validateProject(), (req,res,next)=>{
+router.put('/:id', validateProjectID(), validateProjectContent(), (req,res,next)=>{
     let project = req.body
     console.log('project is updated ',project)
      projects.update(req.params.id,project)
@@ -68,7 +75,7 @@ router.put('/:id', validateProject(), (req,res,next)=>{
 
 //delete
 
-router.delete('/:id', (req,res,next)=>{
+router.delete('/:id', validateProjectID(), (req,res,next)=>{
    
         projects.remove(req.params.id)
         .then(()=>res.send({message:`Project id ${req.params.id} is deleted successfully`}))
@@ -77,9 +84,9 @@ router.delete('/:id', (req,res,next)=>{
 })
 
 
-// get project actions
+// get all actions for a single project
 
-router.get('/:id/actions',(req,res,next)=>{
+router.get('/:id/actions', validateProjectID(),(req,res,next)=>{
 
     projects.getProjectActions(req.params.id)
     .then(actions=>{
