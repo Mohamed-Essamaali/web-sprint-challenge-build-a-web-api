@@ -29,6 +29,7 @@ const router = express.Router()
                 res.send({message:`No Project with id ${req.params.id}`})
             }
         })
+        .catch(err=>next(err))
      }
  }
 
@@ -38,9 +39,11 @@ const router = express.Router()
 // update,
 // remove,
 // getProjectActions,
+
+//get project based on id
 router.get('/:id',validateProjectID(),(req,res,next)=>{
             res.status(200).json(req.body)
-    .catch(err=>next(err))
+    
 })
 
 // insert 

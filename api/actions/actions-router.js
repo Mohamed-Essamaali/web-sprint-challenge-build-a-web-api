@@ -1,64 +1,96 @@
 // Write your "actions" router here!
 
-
-
-
 const express = require('express')
-const server = require('../server')
 const actions = require('./actions-model')
+const projects = require('../projects/projects-model')
 const router = express.Router()
 
 ////////////////////////////////////////////////////////
 // middleware
 
-const validateActions = ()=>{
+const validateActionContent = ()=>{
     return(req,res,next)=>{
         let action = req.body
         
         if(!action.description || !action.notes){
            return res.status(400).json({message:"Missing description or notes"})
-            next()
+           
         }
     }
 }
 
+const valiadteActionId = ()=>{
+    return(req,res,next)=>{
+        actions.get(req.params.id)
+        .then(action=>{
+            if(action){
+                req.body = action
+                // res.status(200).json(action)
+                next()
+            } else
+            {
+             return  res.status(404).json({message: `no ation found with id ${req.params.id}`})
+            }
+           
+        })
+        .catch(err=>{next(err)})
+    }
+}
+
+
+const validateProjectId = ()=>{
+    return(req,res,next)=>{
+        projects.get(req.params.id)
+        .then(project=>{
+            if(!project){
+            return  res.send({messsage:`There is no project with id ${req.params.id} exist`})
+            }
+            next()
+        })
+        .catch(err=>next(err))
+        }
+}
 ////////////////////////////////////////////////////////
 
 // get single action based on id
-router.get('/api/projects/:pID/actions/:aID', (req,res,next)=>{
+router.get('/api/projects/:pID/actions/:id', valiadteActionId(),(req,res,next)=>{
 
-    actions.get(req.params.aID)
-    .then(action=>{
-        if(action){
-            res.status(200).json(action)
-        } else
-        {
-            res.status(404).json({message: `Action not found with id ${req.params.aID}`})
-        }
-        
-    })
+    res.status(200).json(req.body)
+    next()
        
-    .catch(err=>{
-        next(err)
-    })
 })
 
 // insert an action to a specific project
 
-    router.post('/api/projects/:id/actions',validateActions(),(req,res,next)=>{
-    let action = req.body
-    action.project_id = req.params.id
-        actions.insert(action)
-        .then((action)=>{res.status(201).json(action)})
-        .catch(err=>{res.status(204).json({message:"action had not been saved"})})
-   
+    router.post('/api/projects/:id/actions', validateProjectId(),(req,res,next)=>{
+        let action = req.body // save body content into an action variable
 
+        if(!action.description || !action.notes){
+            return res.status(400).json({message:"Missing description or notes"})
+         }
+
+        action.project_id = req.params.id   // add project id into the action variable
+        console.log('action in post method ' , action)
+            actions.insert(action)
+            .then((addedAction)=>{
+                res.status(201).json(addedAction)
+                next()
+            })
+            .catch(err=>{res.send({message:"action had not been saved"})})
+        
+          
+      
     })
 
 // updating 
-    router.put('/api/projects/:projectId/actions/:actionId',validateActions(),(req,res,next)=>{
-            let action = req.body
-            action.project_id = req.params.projectId
+    router.put('/api/projects/:projectId/actions/:actionId',(req,res,next)=>{
+
+            let action = req.body // get content from body
+
+            if(!action.description || !action.notes){
+                return res.status(400).json({message:"Missing description or notes"})
+             }
+            action.project_id = req.params.projectId  // add project id into body from url
             console.log('action in put',action)
             actions.update(req.params.actionId,action)
             .then((updated)=>{
@@ -70,11 +102,11 @@ router.get('/api/projects/:pID/actions/:aID', (req,res,next)=>{
 
     // deleting an action
 
-    router.delete('/api/projects/:projectId/actions/:actionId', (req,res,next)=>{
+    router.delete('/api/projects/:projectId/actions/:id', valiadteActionId(),(req,res,next)=>{
 
     
-            actions.remove(req.params.actionId)
-            .then(()=>res.send({message:`action with id ${req.params.actionId} is deleted successfully`}))
+            actions.remove(req.params.id)
+            .then(()=>res.send({message:`action with id ${req.params.id} is deleted successfully`}))
             .catch(err=>next(err))
 
 
