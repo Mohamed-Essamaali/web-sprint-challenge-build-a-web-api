@@ -40,6 +40,14 @@ const router = express.Router()
 // remove,
 // getProjectActions,
 
+// get endpoint to welcome user
+
+router.get('/',(req,res,next)=>{
+    let welcome = process.env.USER
+    res.send({message: `welcome to ${welcome}`})
+})
+
+
 //get project based on id
 router.get('/:id',validateProjectID(),(req,res,next)=>{
             res.status(200).json(req.body)
