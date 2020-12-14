@@ -26,7 +26,7 @@ server.use((err,req,res,next)=>{
 })
 
 
-const port = 4000
+const port = process.env.PORT || 4000
 
 server.listen(port,()=>{
     console.log(`server is listening on port ${port}`)
